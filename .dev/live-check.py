@@ -48,7 +48,7 @@ with sync_playwright() as p:
                        permissions=['clipboard-read', 'clipboard-write'])
     C, errC = open_page(c1, APP)
     check('라이브 앱 로드', '수유 앱' in C.title() or True, C.title())
-    check('처음엔 로컬 모드', pill(C) == '로컬 저장 모드', pill(C))
+    check('처음엔 로컬 모드', pill(C) == '가족공유 켜기', pill(C))
 
     # 엄마/아빠 기록
     C.click('#whoDad')
@@ -68,7 +68,7 @@ with sync_playwright() as p:
     C.fill('#roomInput', room.lower())
     C.click('#shareSave')
     C.wait_for_function("document.getElementById('sharePill').dataset.mode === 'live'", timeout=25000)
-    check('방 코드만으로 실시간 연결', '실시간 연결됨' in pill(C), pill(C))
+    check('방 코드만으로 실시간 연결', '가족공유 중' in pill(C), pill(C))
     check('방 코드 대문자 정규화', room.upper() in pill(C), pill(C))
     rpath = room.upper()
     t0 = time.time()
@@ -84,7 +84,7 @@ with sync_playwright() as p:
     D, errD = open_page(c2, f'{APP}?room={room}')
     D.wait_for_function("document.getElementById('sharePill').dataset.mode === 'live'", timeout=25000)
     D.wait_for_function("document.querySelectorAll('#recordList .row').length === 2", timeout=25000)
-    check('링크(?room=)만으로 자동 연결·수신', '실시간 연결됨' in pill(D), pill(D))
+    check('링크(?room=)만으로 자동 연결·수신', '가족공유 중' in pill(D), pill(D))
     check('상대 폰에 기록 2개', {x['by'] for x in rows(D)} == {'엄마', '아빠'}, rows(D))
     D.screenshot(path=f'{SHOT}/live-03-동기화.png')
 

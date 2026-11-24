@@ -88,6 +88,7 @@
   const advHint = $('advHint');
   const shareSend = $('shareSend');
   const shareLeave = $('shareLeave');
+  const shareSave = $('shareSave');
   const footerNote = $('footerNote');
 
   /* ───────────── 유틸 ───────────── */
@@ -269,16 +270,20 @@
       dateTxt.className = 'c-date-t';
       dateTxt.textContent = key === todayKey ? '오늘' : `${d.getMonth() + 1}/${d.getDate()}`;
       date.appendChild(dateTxt);
-      if (r.by === 'mom' || r.by === 'dad') {
-        const by = document.createElement('span');
-        by.className = `by by-${r.by}`;
-        by.textContent = byLabel(r.by);
-        date.appendChild(by);
-      }
 
       const time = document.createElement('span');
       time.className = 'c-time';
       time.textContent = clock24(d.getHours() * 60 + d.getMinutes());
+
+      // 엄마 / 아빠 배지 — 시간과 수유량 사이
+      const whoCell = document.createElement('span');
+      whoCell.className = 'c-who';
+      if (r.by === 'mom' || r.by === 'dad') {
+        const by = document.createElement('span');
+        by.className = `by by-${r.by}`;
+        by.textContent = byLabel(r.by);
+        whoCell.appendChild(by);
+      }
 
       const ml = document.createElement('span');
       ml.className = 'c-ml';
@@ -298,7 +303,7 @@
         deleteRecord(r.id);
       });
 
-      row.append(date, time, ml, cumEl, del);
+      row.append(date, time, whoCell, ml, cumEl, del);
       frag.appendChild(row);
     }
     recordList.appendChild(frag);
@@ -570,10 +575,10 @@
     shareStatus.dataset.mode = m;
     shareStatusDot.className = `dot dot-${m}`;
 
-    let label = '로컬 저장 모드';
+    let label = '가족공유 켜기';
     if (m === 'connecting') label = '연결 중…';
-    else if (m === 'live') label = '실시간 연결됨';
-    else if (m === 'polling') label = '연결됨 · 5초 갱신';
+    else if (m === 'live') label = '가족공유 중';
+    else if (m === 'polling') label = '가족공유 중';
     else if (m === 'offline') label = '오프라인 · 저장 중';
     else if (m === 'error') label = '연결 확인 필요';
     shareLabel.textContent = label;
@@ -583,15 +588,18 @@
     shareRoom.hidden = !roomShown;
 
     sharePill.setAttribute('aria-label',
-      m === 'local' ? '로컬 저장 모드 · 가족 공유 설정 열기' : `${label}${roomShown ? ` (방: ${share.room})` : ''} · 가족 공유 설정 열기`);
+      m === 'local' ? '가족공유 켜기 · 가족 공유 설정 열기' : `${label}${roomShown ? ` (방: ${share.room})` : ''} · 가족 공유 설정 열기`);
+
+    // 시트 안 연결 버튼: 꺼져 있을 때는 '가족공유 켜기', 연결된 뒤에는 '연결하기'
+    shareSave.textContent = m === 'local' ? '가족공유 켜기' : '연결하기';
 
     const n = state.records.length;
-    if (m === 'live') shareStatusText.textContent = `● 실시간 연결됨 (방: ${share.room})${n ? ` · 기록 ${n}개` : ''}`;
-    else if (m === 'polling') shareStatusText.textContent = `● 연결됨 (방: ${share.room}) · 5초마다 확인${n ? ` · 기록 ${n}개` : ''}`;
+    if (m === 'live') shareStatusText.textContent = `● 가족공유 중 (방: ${share.room})${n ? ` · 기록 ${n}개` : ''}`;
+    else if (m === 'polling') shareStatusText.textContent = `● 가족공유 중 (방: ${share.room}) · 5초마다 확인${n ? ` · 기록 ${n}개` : ''}`;
     else if (m === 'connecting') shareStatusText.textContent = `연결 중… (방: ${share.room})`;
     else if (m === 'offline') shareStatusText.textContent = `오프라인 · 이 기기에 먼저 저장하고 있어요${share.room ? ` (방: ${share.room})` : ''}`;
     else if (m === 'error') shareStatusText.textContent = '연결하지 못했어요 · 주소와 방 코드를 확인해 주세요';
-    else shareStatusText.textContent = '로컬 저장 모드 · 이 기기에만 저장돼요';
+    else shareStatusText.textContent = '가족공유 꺼짐 · 이 기기에만 저장돼요';
 
     footerNote.textContent = m === 'live' || m === 'polling'
       ? `가족 방 ${share.room} · 엄마 아빠가 함께 보고 있어요`

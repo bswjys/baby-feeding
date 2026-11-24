@@ -34,7 +34,7 @@ with sync_playwright() as p:
     C.fill('#roomInput', '우리 집')
     C.click('#shareSave')
     C.wait_for_function("document.getElementById('sharePill').dataset.mode === 'live'", timeout=25000)
-    check('한글 방 코드 연결', '실시간 연결됨' in C.inner_text('#sharePill'), C.inner_text('#sharePill').replace('\n', ' '))
+    check('한글 방 코드 연결', '가족공유 중' in C.inner_text('#sharePill'), C.inner_text('#sharePill').replace('\n', ' '))
     check('공백 제거된 코드', '우리집' in C.inner_text('#sharePill'), C.inner_text('#sharePill').replace('\n', ' '))
     C.wait_for_function(
         "fetch('%s/rooms/%s/records.json').then(r => r.json()).then(d => !!d && Object.keys(d).length === 1)" % (RURL, enc),

@@ -2,9 +2,9 @@
 """수유 앱 · 실제 업그레이드 경로 검증.
 
 사용자 아이폰 상태를 그대로 만든다:
-  1) 옛 서비스워커(v3, 캐시 우선) + 옛 app.js(엄마/아빠 버튼 핸들러 없음)가 설치된 기기
+  1) 옛 캐시(v3)가 남은 기기 + 옛 app.js(엄마/아빠 버튼 핸들러 없음)가 설치된 기기
   2) 새 버전을 배포
-  3) 앱을 다시 열었을 때 버튼이 살아나고, 서비스워커·캐시가 v4 로 넘어오는지 확인
+  3) 앱을 다시 열었을 때 버튼이 살아나고, 서비스워커·캐시가 v5 로 넘어오는지 확인
 """
 import os
 import re
@@ -65,8 +65,11 @@ def main():
         else:
             shutil.copy2(src, dst)
 
-    # 옛 서비스워커(v3) = 배포본 그대로, 옛 app.js = 핸들러 없는 버전
+    # 옛 서비스워커(v3) = HEAD 배포본의 캐시 이름을 v3 로 되감아 '옛 캐시가 남은 기기'를 재현
+    # (HEAD 는 이미 현재 배포본과 같을 수 있어서, 이름만 옛 버전으로 되돌린다)
     old_sw = subprocess.check_output(['git', 'show', 'HEAD:sw.js'], cwd=ROOT).decode('utf-8')
+    old_sw = re.sub(r"const CACHE = 'baby-feeding-v\d+'", "const CACHE = 'baby-feeding-v3'", old_sw)
+    old_sw = re.sub(r"const VERSION = '\d+'", "const VERSION = '3'", old_sw)
     check('옛 sw.js 는 v3 (재현 조건)', "const CACHE = 'baby-feeding-v3'" in old_sw)
     with open(os.path.join(tmp, 'sw.js'), 'w', encoding='utf-8') as f:
         f.write(old_sw)
@@ -75,7 +78,7 @@ def main():
     # 옛 HTML: 버전 쿼리 없는 상태
     idx = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
     with open(os.path.join(tmp, 'index.html'), 'w', encoding='utf-8') as f:
-        f.write(idx.replace('./styles.css?v=4', './styles.css').replace('./app.js?v=4', './app.js'))
+        f.write(idx.replace('./styles.css?v=5', './styles.css').replace('./app.js?v=5', './app.js'))
 
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(PORT), '--bind', '127.0.0.1'],
                            cwd=tmp, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -119,7 +122,7 @@ def main():
             time.sleep(1.2)                      # Last-Modified 초 단위 구분
             for name in ('index.html', 'app.js', 'styles.css', 'sw.js'):
                 os.utime(os.path.join(tmp, name), None)
-            check('배포할 index.html 에 ?v=4', 'app.js?v=4' in open(os.path.join(tmp, 'index.html'), encoding='utf-8').read())
+            check('배포할 index.html 에 ?v=5', 'app.js?v=5' in open(os.path.join(tmp, 'index.html'), encoding='utf-8').read())
 
             # ── ③ 사용자가 앱을 다시 연다
             page.reload(wait_until='load')
@@ -135,7 +138,7 @@ def main():
             check('👩 엄마 버튼 동작', page.get_attribute('#whoMom', 'aria-pressed') == 'true')
             page.click('#sharePill')
             page.wait_for_selector('#shareSheet:not([hidden])', timeout=5000)
-            check('로컬 저장 모드 버튼 동작', page.is_visible('#shareSheet .sheet'))
+            check('가족공유 켜기 버튼 동작', page.is_visible('#shareSheet .sheet'))
             page.click('#shareCancel')
             page.screenshot(path=os.path.join(DEVDIR, 'shots', 'upgrade-02-수정후.png'))
 
@@ -143,14 +146,14 @@ def main():
             page.reload(wait_until='load')
             page.wait_for_timeout(1200)
             keys = page.evaluate("async () => (await caches.keys()).filter(k=>k.startsWith('baby-feeding-'))")
-            check('캐시가 v4 만 남음', keys == ['baby-feeding-v4'], keys)
+            check('캐시가 v5 만 남음', keys == ['baby-feeding-v5'], keys)
             scripts = page.evaluate("() => Array.from(document.scripts).map(s => s.src)")
-            check('새 HTML 이 app.js?v=4 로드', any('app.js?v=4' in s for s in scripts), scripts)
+            check('새 HTML 이 app.js?v=5 로드', any('app.js?v=5' in s for s in scripts), scripts)
             cache_keys = page.evaluate("""async () => {
-                const c = await caches.open('baby-feeding-v4');
+                const c = await caches.open('baby-feeding-v5');
                 return (await c.keys()).map(r => r.url);
             }""")
-            check('v4 캐시에 app.js?v=4 포함', any('app.js?v=4' in u for u in cache_keys))
+            check('v5 캐시에 app.js?v=5 포함', any('app.js?v=5' in u for u in cache_keys))
             page.click('#whoDad')
             page.wait_for_timeout(200)
             check('업그레이드 후에도 버튼 동작', page.get_attribute('#whoDad', 'aria-pressed') == 'true')

@@ -1,12 +1,12 @@
-/* 수유 앱 · 오프라인 캐시 (v4)
+/* 수유 앱 · 오프라인 캐시 (v5)
  * 규칙
  *  - HTML(index.html): 네트워크 우선 → 오프라인일 때만 캐시
  *  - 코드(app.js, styles.css): 네트워크 우선 → 오프라인일 때만 캐시
  *    (예전엔 캐시 우선이라서 새 HTML + 옛 app.js 가 섞여 버튼이 안 먹혔음)
  *  - 아이콘 등 나머지: 캐시 우선
  */
-const CACHE = 'baby-feeding-v4';
-const VERSION = '4';
+const CACHE = 'baby-feeding-v5';
+const VERSION = '5';
 const ASSETS = [
   './',
   './index.html',

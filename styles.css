@@ -142,6 +142,26 @@ h1{
   color:#C4697F;
 }
 .share-room[hidden]{display:none;}
+/* 꺼져 있을 때: 점 없이 "가족공유 켜기" 버튼처럼 */
+.share-pill[data-mode="local"]{
+  border-color:#FFD9E4;
+  background:#FFF0F4;
+  color:#C4697F;
+  font-weight:800;
+}
+.share-pill[data-mode="local"] .dot{display:none;}
+.share-pill[data-mode="live"],
+.share-pill[data-mode="polling"]{
+  border-color:#CDEBD9;
+  background:#F1FBF5;
+  color:#3F7A5C;
+}
+.share-pill[data-mode="live"] .share-room,
+.share-pill[data-mode="polling"] .share-room{
+  background:#FFFFFF;
+  border-color:#CDEBD9;
+  color:#3F7A5C;
+}
 .dot{
   flex:0 0 auto;
   width:7px;height:7px;
@@ -407,9 +427,9 @@ h2{
 .tbl{margin-top:2px;}
 .tr{
   display:grid;
-  grid-template-columns:48px 56px minmax(0,1fr) minmax(0,1fr) 24px;
+  grid-template-columns:44px 48px 34px minmax(0,1fr) minmax(0,1fr) 24px;
   align-items:center;
-  gap:6px;
+  gap:5px;
   padding:7px 3px;
   font-size:12.5px;
   font-variant-numeric:tabular-nums;
@@ -431,9 +451,9 @@ h2{
 }
 .row{
   display:grid;
-  grid-template-columns:48px 56px minmax(0,1fr) minmax(0,1fr) 24px;
+  grid-template-columns:44px 48px 34px minmax(0,1fr) minmax(0,1fr) 24px;
   align-items:center;
-  gap:6px;
+  gap:5px;
   padding:8px 3px;
   border-bottom:1px dashed #F6E7DC;
   font-variant-numeric:tabular-nums;
@@ -442,13 +462,19 @@ h2{
 }
 .row:last-child{border-bottom:0;}
 .row:active{background:#FFF6EF;}
-.row .c-date{display:flex;flex-direction:column;align-items:flex-start;gap:2px;line-height:1.1;}
-.row .c-date-t{font-size:11.5px;color:#A78F87;}
+.row .c-date{display:flex;align-items:center;min-width:0;line-height:1.1;}
+.row .c-date-t{font-size:11.5px;color:#A78F87;white-space:nowrap;}
+.row .c-who{display:flex;align-items:center;justify-content:flex-start;min-width:0;}
+.tr.th .c-who{font-size:10.5px;color:#B39C94;}
 .row .by{
-  display:inline-block;
-  font-size:8.5px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:26px;
+  height:15px;
+  font-size:9px;
   font-weight:800;
-  line-height:1.35;
+  line-height:1;
   letter-spacing:-.02em;
   padding:0 4px;
   border-radius:999px;
@@ -829,7 +855,10 @@ h2{
   .clock{width:84px;height:84px;}
   .bottle{width:76px;height:114px;}
   .time-box .tval{font-size:24px;}
-  .tr,.row{grid-template-columns:44px 50px minmax(0,1fr) minmax(0,1fr) 22px;gap:4px;}
+  .tr,.row{grid-template-columns:38px 42px 30px minmax(0,1fr) minmax(0,1fr) 22px;gap:3px;}
+  .row .by{min-width:24px;font-size:8.5px;padding:0 3px;}
+  .row .c-ml{font-size:12px;}
+  .row .c-cum{font-size:11.5px;}
   .day .dow{font-size:9.5px;}
   .day .v{font-size:11px;}
   .who-btn{padding:5px 7px;font-size:11px;}

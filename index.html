@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="수유">
-<link rel="stylesheet" href="./styles.css?v=4">
+<link rel="stylesheet" href="./styles.css?v=5">
 </head>
 <body>
 <div class="app">
@@ -33,9 +33,9 @@
           <span class="who-emoji" aria-hidden="true">👨</span> 아빠
         </button>
       </div>
-      <button class="share-pill" id="sharePill" type="button" aria-label="가족 공유 설정 열기">
+      <button class="share-pill" id="sharePill" type="button" data-mode="local" aria-label="가족공유 켜기 · 가족 공유 설정 열기">
         <span class="dot dot-local" id="shareDot" aria-hidden="true"></span>
-        <span class="share-label" id="shareLabel">로컬 저장 모드</span>
+        <span class="share-label" id="shareLabel">가족공유 켜기</span>
         <span class="share-room" id="shareRoom" hidden></span>
       </button>
     </div>
@@ -139,7 +139,7 @@
 
   <p class="hint">시계 ▸ <b>지금 시간</b> · 젖병 ▸ <b>바로 기록</b> · 아래 박스도 눌러서 기록</p>
 
-  <!-- ⑧ 날짜 · 시간 · 수유량 · 누적 -->
+  <!-- ⑧ 날짜 · 시간 · 누가 · 수유량 · 누적 -->
   <section class="panel list-panel">
     <div class="panel-head">
       <h2>기록</h2>
@@ -147,7 +147,7 @@
     </div>
     <div class="tbl">
       <div class="tr th">
-        <span>날짜</span><span>시간</span><span class="ta-r">수유량</span><span class="ta-r">누적</span><span></span>
+        <span>날짜</span><span>시간</span><span class="c-who">누가</span><span class="ta-r">수유량</span><span class="ta-r">누적</span><span></span>
       </div>
       <div class="tbody" id="recordList"></div>
     </div>
@@ -217,7 +217,7 @@
 
     <div class="share-status" id="shareStatus" data-mode="local">
       <span class="dot dot-local" id="shareStatusDot" aria-hidden="true"></span>
-      <span id="shareStatusText">로컬 저장 모드 · 이 기기에만 저장돼요</span>
+      <span id="shareStatusText">가족공유 꺼짐 · 이 기기에만 저장돼요</span>
     </div>
 
     <label class="field col">
@@ -252,6 +252,6 @@
   </div>
 </div>
 
-<script src="./app.js?v=4"></script>
+<script src="./app.js?v=5"></script>
 </body>
 </html>

@@ -61,6 +61,27 @@ def rows(page):
     }))""")
 
 
+def row_layout(page):
+    return page.evaluate("""() => Array.from(document.querySelectorAll('#recordList .row')).map(r => {
+        const t = r.querySelector('.c-time').getBoundingClientRect();
+        const w = r.children[2];
+        const b = w.querySelector('.by');
+        const wb = w.getBoundingClientRect();
+        const m = r.querySelector('.c-ml').getBoundingClientRect();
+        const rb = r.getBoundingClientRect();
+        return {cls: w.className, badge: b ? b.textContent : null,
+                gapLeft: +(wb.left - t.right).toFixed(1),
+                gapRight: +(m.left - wb.right).toFixed(1),
+                inRow: wb.right <= rb.right + 0.5,
+                clipH: b ? b.scrollWidth - b.clientWidth : 0};
+    })""")
+
+
+def layout_ok(lay):
+    return all(x['cls'] == 'c-who' and x['gapLeft'] >= -0.5 and x['gapRight'] >= -0.5
+               and x['inRow'] and x['clipH'] <= 1 for x in lay)
+
+
 def connect_room(page, url, room, wait=True):
     page.click('#sharePill')
     page.wait_for_selector('#shareSheet:not([hidden])')
@@ -79,7 +100,7 @@ def main():
         ctx, page, errs = new_page(browser, 390)
         page.goto(APP)
         page.wait_for_timeout(400)
-        check('로컬 모드: 상태 뱃지 표기', status_text(page) == '로컬 저장 모드', status_text(page))
+        check('로컬 모드: 상태 뱃지 표기', status_text(page) == '가족공유 켜기', status_text(page))
         check('로컬 모드: 초기 기록 0개', len(rows(page)) == 0)
         check('기록자 기본값 = 엄마', page.get_attribute('#whoMom', 'aria-pressed') == 'true')
         page.screenshot(path=f'{SHOT}/local-01-초기.png')
@@ -105,6 +126,13 @@ def main():
         r = rows(page)
         check('엄마 기록 + 배지', len(r) == 2 and r[0]['by'] == '엄마' and r[0]['ml'] == '80ml', r)
         check('오늘 합계', '오늘 2회 · 140ml' in page.inner_text('#todaySum'), page.inner_text('#todaySum'))
+
+        # ⑧ 표 순서: 날짜 · 시간 · 누가 · 수유량 · 누적
+        head = page.evaluate("() => Array.from(document.querySelectorAll('.tr.th > span')).map(s => s.textContent.trim())")
+        check('표 헤더 순서 (누가가 시간·수유량 사이)', head[:5] == ['날짜', '시간', '누가', '수유량', '누적'], head)
+        lay = row_layout(page)
+        check('배지가 세 번째 칸 · 시간과 수유량 사이', layout_ok(lay), lay)
+        check('배지 글자 = 엄마/아빠', [x['badge'] for x in lay] == ['엄마', '아빠'], [x['badge'] for x in lay])
         page.screenshot(path=f'{SHOT}/local-02-기록.png')
 
         # 편집 시트에 기록자 표시
@@ -136,6 +164,10 @@ def main():
         page.wait_for_timeout(250)
         ov = overflow(page)
         check('320px 가로 넘침 없음', not ov, ov)
+        lay = row_layout(page)
+        check('320px 배지가 시간·수유량 사이 유지', layout_ok(lay), lay)
+        head = page.evaluate("() => Array.from(document.querySelectorAll('.tr.th > span')).map(s => s.textContent.trim())")
+        check('320px 헤더 6칸 유지', len(head) == 6 and head[2] == '누가', head)
         page.screenshot(path=f'{SHOT}/local-03-320.png')
 
         # 공유 시트도 320px 확인
@@ -174,7 +206,7 @@ def main():
         # A = 엄마 폰
         connect_room(A, DB, 'MOM123')
         A.wait_for_timeout(1800)
-        check('A 연결: 실시간 상태', '실시간 연결됨' in status_text(A), status_text(A))
+        check('A 연결: 실시간 상태', '가족공유 중' in status_text(A), status_text(A))
         check('A 연결: 방 코드 표기', 'MOM123' in A.inner_text('#sharePill'), A.inner_text('#sharePill'))
         check('A 연결: 기록이 방으로 올라감',
               A.evaluate("fetch('%s/__dump').then(r => r.json()).then(d => Object.keys((d.MOM123) || {}).length)" % DB) == 2)
@@ -183,7 +215,7 @@ def main():
         # B = 아빠 폰 (새 기기)
         connect_room(B, DB, 'MOM123')
         B.wait_for_timeout(1800)
-        check('B 연결: 실시간 상태', '실시간 연결됨' in status_text(B), status_text(B))
+        check('B 연결: 실시간 상태', '가족공유 중' in status_text(B), status_text(B))
         rb = rows(B)
         check('B가 A의 기록 2개를 받음', len(rb) == 2 and {x['by'] for x in rb} == {'엄마', '아빠'}, rb)
         B.screenshot(path=f'{SHOT}/share-03-B-동기화.png')
@@ -224,12 +256,12 @@ def main():
         ctxA.set_offline(False)
         B.wait_for_function("document.querySelectorAll('#recordList .row').length === 3", timeout=12000)
         check('온라인 복귀 후 자동 동기화', len(rows(B)) == 3, len(rows(B)))
-        check('복귀 후 실시간 상태', '실시간 연결됨' in status_text(A), status_text(A))
+        check('복귀 후 실시간 상태', '가족공유 중' in status_text(A), status_text(A))
 
         # B 새로고침 → 설정 유지 + 재연결
         B.reload()
         B.wait_for_timeout(1600)
-        check('B 새로고침 후 방 설정 유지', '실시간 연결됨' in status_text(B) and 'MOM123' in B.inner_text('#sharePill'),
+        check('B 새로고침 후 방 설정 유지', '가족공유 중' in status_text(B) and 'MOM123' in B.inner_text('#sharePill'),
               status_text(B))
         check('B 새로고침 후 기록 3개', len(rows(B)) == 3, len(rows(B)))
 
@@ -246,7 +278,7 @@ def main():
         A.wait_for_selector('#shareSheet:not([hidden])')
         A.click('#shareLeave')
         A.wait_for_timeout(500)
-        check('공유 끄면 로컬 모드', status_text(A) == '로컬 저장 모드', status_text(A))
+        check('공유 끄면 로컬 모드', status_text(A) == '가족공유 켜기', status_text(A))
         check('공유 꺼도 기록 유지', len(rows(A)) == 3, len(rows(A)))
 
         errs = errsA + errsB
@@ -278,8 +310,8 @@ def main():
         C.wait_for_selector('#shareSheet:not([hidden])')
         C.fill('#roomInput', room)
         C.click('#shareSave')
-        C.wait_for_function("'실시간 연결됨' === document.getElementById('sharePill').innerText.split('\\n')[0]", timeout=20000)
-        check('실제 Firebase: 실시간 연결됨', '실시간 연결됨' in status_text(C), status_text(C))
+        C.wait_for_function("'가족공유 중' === document.getElementById('sharePill').innerText.split('\\n')[0]", timeout=20000)
+        check('실제 Firebase: 가족공유 중', '가족공유 중' in status_text(C), status_text(C))
 
         RURL = 'https://baby-feeding-9f820-default-rtdb.asia-southeast1.firebasedatabase.app'
         rpath = room.upper()
@@ -293,9 +325,9 @@ def main():
 
         # D: 아빠 폰 — 공유 링크(?room=) 로 열기만 해도 자동 연결
         D.goto(APP + '?room=' + room)
-        D.wait_for_function("'실시간 연결됨' === document.getElementById('sharePill').innerText.split('\\n')[0]", timeout=20000)
+        D.wait_for_function("'가족공유 중' === document.getElementById('sharePill').innerText.split('\\n')[0]", timeout=20000)
         D.wait_for_timeout(1200)
-        check('링크(?room=)로 자동 연결', '실시간 연결됨' in status_text(D), status_text(D))
+        check('링크(?room=)로 자동 연결', '가족공유 중' in status_text(D), status_text(D))
         rd = rows(D)
         check('실제 Firebase: 상대 폰이 기록 2개 수신', len(rd) == 2 and {x['by'] for x in rd} == {'엄마', '아빠'}, rd)
         D.screenshot(path=f'{SHOT}/real-02-동기화.png')
