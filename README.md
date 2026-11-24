@@ -112,6 +112,10 @@ python3 -m http.server 8765
 
 # 자동 검증 (가짜 Firebase + 실제 Firebase 두 기기 동기화 49개 항목)
 bash .dev/run-tests.sh
+
+# 라이브 사이트 + 실제 Firebase 확인 (테스트 방은 끝나고 자동 정리)
+python3 .dev/live-check.py
+python3 .dev/korean-room-check.py
 ```
 
 서비스워커와 매니페스트는 `https` 또는 `localhost`에서만 동작합니다. 파일을 수정해 배포하면 `sw.js`의
