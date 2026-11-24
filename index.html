@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="수유">
-<link rel="stylesheet" href="./styles.css?v=5">
+<link rel="stylesheet" href="./styles.css?v=6">
 </head>
 <body>
 <div class="app">
@@ -81,11 +81,14 @@
     <!-- ④ 기본량 · ⑤ 젖병 · ⑥ 수유량 화살표 · ⑦ 수유량 박스 -->
     <section class="panel bottle-panel">
       <div class="base-row">
-        <button class="base-box" id="baseBox" type="button" aria-label="기본량 10ml 늘리기, 길게 누르면 60ml로 초기화">
+        <div class="base-box" id="baseBox">
           <span class="base-label">기본량</span>
           <span class="base-val" id="baseVal">60ml</span>
-        </button>
-        <button class="mini" id="baseMinus" type="button" aria-label="기본량 10ml 줄이기">−</button>
+        </div>
+        <div class="stepper" role="group" aria-label="기본량 10ml 단위 조절">
+          <button class="step" id="baseUp" type="button" aria-label="기본량 10ml 늘리기">▲</button>
+          <button class="step" id="baseDown" type="button" aria-label="기본량 10ml 줄이기">▼</button>
+        </div>
       </div>
       <div class="bottle-row">
         <button class="bottle" id="bottleBtn" type="button" aria-label="기본량으로 바로 수유 기록하기">
@@ -137,7 +140,7 @@
     </section>
   </div>
 
-  <p class="hint">시계 ▸ <b>지금 시간</b> · 젖병 ▸ <b>바로 기록</b> · 아래 박스도 눌러서 기록</p>
+  <p class="hint">시계 ▸ <b>지금 시간</b> · 젖병 ▸ <b>바로 기록</b> · 기본량 ▸ <b>▲▼</b> 10ml</p>
 
   <!-- ⑧ 날짜 · 시간 · 누가 · 수유량 · 누적 -->
   <section class="panel list-panel">
@@ -252,6 +255,6 @@
   </div>
 </div>
 
-<script src="./app.js?v=5"></script>
+<script src="./app.js?v=6"></script>
 </body>
 </html>

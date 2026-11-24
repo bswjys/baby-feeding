@@ -278,7 +278,8 @@ h1{
 }
 
 /* ── bottle ── */
-.base-row{display:flex;align-items:center;gap:5px;}
+/* ④ 기본량: 누르는 버튼이 아니라 표시 박스 (조절은 오른쪽 ▲▼) */
+.base-row{display:flex;align-items:stretch;gap:5px;}
 .base-box{
   flex:1 1 auto;
   min-width:0;
@@ -292,35 +293,12 @@ h1{
   border:1.5px solid #FFD9C9;
   background:linear-gradient(180deg,#FFF3E9,#FFE6D6);
   box-shadow:0 2px 0 #FBDECD;
-  cursor:pointer;
-  transition:transform .1s ease, box-shadow .1s ease;
   -webkit-user-select:none;user-select:none;
   -webkit-touch-callout:none;
 }
-.base-box:active{transform:translateY(2px);box-shadow:0 0 0 #FBDECD;}
-.base-box.flash{animation:flash .5s ease;}
-@keyframes flash{
-  0%{background:linear-gradient(180deg,#FFF3E9,#FFE6D6);}
-  40%{background:linear-gradient(180deg,#FFE1CE,#FFD2BD);}
-  100%{background:linear-gradient(180deg,#FFF3E9,#FFE6D6);}
-}
+.base-box.bump{animation:bump .35s ease;}
 .base-label{font-size:10px;font-weight:700;color:#C79E8C;letter-spacing:.06em;}
 .base-val{font-family:var(--round);font-variant-numeric:tabular-nums;font-size:17px;font-weight:800;color:#B9705A;letter-spacing:-.03em;}
-.mini{
-  flex:0 0 auto;
-  width:28px;
-  height:44px;
-  border-radius:13px;
-  border:1.5px solid #F6DCD0;
-  background:linear-gradient(180deg,#FFFFFF,#FFF4EC);
-  color:#CB9C8B;
-  font-size:15px;
-  font-weight:700;
-  padding:0;
-  cursor:pointer;
-  box-shadow:0 2px 0 #F3DDD0;
-}
-.mini:active{transform:translateY(2px);box-shadow:none;}
 
 .bottle-row{
   flex:1 1 auto;

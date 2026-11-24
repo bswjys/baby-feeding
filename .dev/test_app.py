@@ -9,6 +9,7 @@ from playwright.sync_api import sync_playwright
 
 APP = 'http://127.0.0.1:8765/index.html'
 DB = 'http://127.0.0.1:8766'
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'shots')
 os.makedirs(SHOT, exist_ok=True)
 
@@ -82,6 +83,49 @@ def layout_ok(lay):
                and x['inRow'] and x['clipH'] <= 1 for x in lay)
 
 
+def base_state(page):
+    return page.evaluate("""() => ({
+        base: document.getElementById('baseVal').textContent,
+        bottle: document.getElementById('bottleText').textContent,
+        amount: document.getElementById('amountVal').textContent,
+        boxTag: document.getElementById('baseBox').tagName,
+    })""")
+
+
+def stepper_metrics(page):
+    """④ 기본량 · ③ 시간 · ⑥ 수유량 스테퍼가 같은 모양인지 비교"""
+    return page.evaluate("""() => {
+        const m = (sel) => {
+            const el = document.querySelector(sel);
+            if (!el) return null;
+            const r = el.getBoundingClientRect();
+            const cs = getComputedStyle(el);
+            return {w: +r.width.toFixed(1), h: +r.height.toFixed(1),
+                    radius: cs.borderTopLeftRadius, fs: cs.fontSize, color: cs.color,
+                    bg: cs.backgroundImage};
+        };
+        return {base: m('#baseUp'), time: m('#timeUp'), amt: m('#amtUp'),
+                baseDown: m('#baseDown')};
+    }""")
+
+
+def panel_metrics(page):
+    """시계 패널 · 젖병 패널의 높이와 기본량 줄의 정렬"""
+    return page.evaluate("""() => {
+        const r = (s) => document.querySelector(s).getBoundingClientRect();
+        const cl = r('.clock-panel'), bt = r('.bottle-panel');
+        const box = r('#baseBox'), up = r('#baseUp'), down = r('#baseDown');
+        return {
+            clockH: +cl.height.toFixed(1), bottleH: +bt.height.toFixed(1),
+            baseBoxH: +box.height.toFixed(1), baseBoxTop: +box.top.toFixed(1),
+            baseBoxBottom: +box.bottom.toFixed(1),
+            upTop: +up.top.toFixed(1), downBottom: +down.bottom.toFixed(1),
+            upLeft: +up.left.toFixed(1), downLeft: +down.left.toFixed(1),
+            upBottom: +up.bottom.toFixed(1), downTop: +down.top.toFixed(1),
+        };
+    }""")
+
+
 def connect_room(page, url, room, wait=True):
     page.click('#sharePill')
     page.wait_for_selector('#shareSheet:not([hidden])')
@@ -104,6 +148,101 @@ def main():
         check('로컬 모드: 초기 기록 0개', len(rows(page)) == 0)
         check('기록자 기본값 = 엄마', page.get_attribute('#whoMom', 'aria-pressed') == 'true')
         page.screenshot(path=f'{SHOT}/local-01-초기.png')
+
+        # ─────── ④ 기본량: 누르는 버튼 → 표시 박스 + 오른쪽 ▲▼ ───────
+        st = base_state(page)
+        check('④ 기본량 초기값 60ml', st['base'] == '60ml' and st['bottle'] == '60ml', st)
+        check('④ 기본량 박스는 버튼이 아님(표시 전용)', st['boxTag'] == 'DIV', st['boxTag'])
+        check('④ 기본량 ▲▼ 버튼 존재', page.evaluate(
+            "() => !!document.getElementById('baseUp') && !!document.getElementById('baseDown')"))
+        check('④ 기본량 − 보조버튼 제거', page.evaluate("() => !document.getElementById('baseMinus')"))
+        check('④ 기본량 길게누르기 핸들러 제거', 'LONG_PRESS_MS' not in open(os.path.join(ROOT, 'app.js'), encoding='utf-8').read())
+
+        # 박스를 직접 눌러도 값이 바뀌지 않는다 (예전엔 +10ml)
+        page.click('#baseBox')
+        page.wait_for_timeout(150)
+        check('④ 기본량 박스 클릭 → 값 그대로', base_state(page)['base'] == '60ml', base_state(page)['base'])
+        # 길게 눌러도 초기화되지 않는다
+        page.evaluate("""() => {
+            const r = document.getElementById('baseBox').getBoundingClientRect();
+            window.__boxCenter = {x: r.left + r.width / 2, y: r.top + r.height / 2};
+        }""")
+        c = page.evaluate("() => window.__boxCenter")
+        page.mouse.move(c['x'], c['y'])
+        page.mouse.down()
+        page.wait_for_timeout(900)
+        page.mouse.up()
+        page.wait_for_timeout(150)
+        check('④ 기본량 길게 눌러도 그대로', base_state(page)['base'] == '60ml', base_state(page)['base'])
+
+        # ▲ → 10ml 증가, 젖병·⑦ 도 따라감
+        page.click('#baseUp')
+        page.wait_for_timeout(150)
+        st = base_state(page)
+        check('④ 기본량 ▲ → 70ml', st['base'] == '70ml', st)
+        check('④ 기본량 바꾸면 젖병(⑤) 글자도 70ml', st['bottle'] == '70ml', st)
+        check('④ 기본량 바꾸면 수유량(⑦)도 따라감', st['amount'] == '70ml', st)
+        check('④ 기본량 localStorage 저장', page.evaluate(
+            "() => JSON.parse(localStorage.getItem('babyFeeding.v1')).base") == 70)
+        page.screenshot(path=f'{SHOT}/base-01-70ml.png')
+
+        page.click('#baseDown')
+        page.wait_for_timeout(150)
+        check('④ 기본량 ▼ → 60ml', base_state(page)['base'] == '60ml', base_state(page)['base'])
+
+        # ⑥ 으로 ⑦ 을 따로 만진 뒤에는 기본량을 바꿔도 ⑦ 이 끌려가지 않는다
+        page.click('#amtUp')
+        page.click('#amtUp')
+        page.wait_for_timeout(120)
+        check('⑥ 로 ⑦ = 80ml', base_state(page)['amount'] == '80ml', base_state(page)['amount'])
+        page.click('#baseUp')
+        page.wait_for_timeout(150)
+        st = base_state(page)
+        check('⑥ 로 맞춘 ⑦ 은 기본량 변경에 영향 없음', st['base'] == '70ml' and st['amount'] == '80ml', st)
+
+        # 최소 10ml · 최대 300ml
+        for _ in range(9):
+            page.click('#baseDown')
+            page.wait_for_timeout(30)
+        page.wait_for_timeout(150)
+        check('④ 기본량 최소 10ml', base_state(page)['base'] == '10ml', base_state(page)['base'])
+        page.click('#baseDown')
+        page.wait_for_timeout(120)
+        check('④ 10ml 아래로는 안 내려감', base_state(page)['base'] == '10ml', base_state(page)['base'])
+        check('④ 10ml 한계 안내', '기본량은 10ml까지예요' in page.inner_text('#toast'), page.inner_text('#toast'))
+
+        page.evaluate("""() => {
+            const raw = JSON.parse(localStorage.getItem('babyFeeding.v1') || '{}');
+            raw.base = 300; localStorage.setItem('babyFeeding.v1', JSON.stringify(raw));
+        }""")
+        page.reload()
+        page.wait_for_timeout(400)
+        check('④ 기본량 300ml 로 저장돼 있으면 그대로', base_state(page)['base'] == '300ml', base_state(page)['base'])
+        page.click('#baseUp')
+        page.wait_for_timeout(120)
+        check('④ 300ml 위로는 안 올라감', base_state(page)['base'] == '300ml', base_state(page)['base'])
+        check('④ 300ml 한계 안내', '기본량은 300ml까지예요' in page.inner_text('#toast'), page.inner_text('#toast'))
+
+        page.evaluate("() => localStorage.removeItem('babyFeeding.v1')")
+        page.reload()
+        page.wait_for_timeout(400)
+        check('④ 초기화 후 60ml 로 돌아감', base_state(page)['base'] == '60ml', base_state(page)['base'])
+
+        # ▲▼ 모양이 시계 옆(③) · 젖병 옆(⑥) 과 같다
+        sm = stepper_metrics(page)
+        same = all(sm['base'][k] == sm['time'][k] == sm['amt'][k]
+                   for k in ('w', 'h', 'radius', 'fs', 'color', 'bg'))
+        check('④ ▲▼ 모양이 ③·⑥ 과 같음', same, sm)
+        check('④ ▲ 가 ▼ 위에 세로로', sm['base']['w'] == sm['baseDown']['w'])
+
+        pm = panel_metrics(page)
+        check('390px 시계·젖병 패널 높이 같음', abs(pm['clockH'] - pm['bottleH']) <= 1, pm)
+        check('390px 기본량 박스가 ▲▼ 높이에 맞춰 참',
+              abs(pm['baseBoxH'] - (pm['downBottom'] - pm['upTop'])) <= 1, pm)
+        check('390px 기본량 박스-▲▼ 위아래 정렬',
+              abs(pm['baseBoxTop'] - pm['upTop']) <= 1 and abs(pm['baseBoxBottom'] - pm['downBottom']) <= 1, pm)
+        check('390px ▲ 와 ▼ 가 같은 x에 놓임', abs(pm['upLeft'] - pm['downLeft']) <= 0.5, pm)
+        check('390px ▲ 가 ▼ 위에 놓임', pm['upBottom'] <= pm['downTop'] + 0.5, pm)
 
         # 아빠로 전환 → 젖병 기록
         page.click('#whoDad')
@@ -164,6 +303,22 @@ def main():
         page.wait_for_timeout(250)
         ov = overflow(page)
         check('320px 가로 넘침 없음', not ov, ov)
+        pm = panel_metrics(page)
+        check('320px 시계·젖병 패널 높이 같음', abs(pm['clockH'] - pm['bottleH']) <= 1, pm)
+        check('320px 기본량 박스-▲▼ 위아래 정렬',
+              abs(pm['baseBoxTop'] - pm['upTop']) <= 1 and abs(pm['baseBoxBottom'] - pm['downBottom']) <= 1, pm)
+        sm2 = stepper_metrics(page)
+        check('320px ④ ▲▼ 가 ③·⑥ 과 같은 모양',
+              all(sm2['base'][k] == sm2['time'][k] == sm2['amt'][k]
+                  for k in ('w', 'h', 'radius', 'fs', 'color', 'bg')), sm2)
+        check('320px 기본량 글자 잘리지 않음', page.evaluate(
+            "() => { const e = document.getElementById('baseVal'); return e.scrollWidth - e.clientWidth; }") <= 1)
+        page.click('#baseUp')
+        page.wait_for_timeout(150)
+        check('320px 기본량 ▲ 동작', base_state(page)['base'] == '70ml', base_state(page)['base'])
+        page.click('#baseDown')
+        page.wait_for_timeout(150)
+        check('320px 기본량 ▼ 복귀', base_state(page)['base'] == '60ml', base_state(page)['base'])
         lay = row_layout(page)
         check('320px 배지가 시간·수유량 사이 유지', layout_ok(lay), lay)
         head = page.evaluate("() => Array.from(document.querySelectorAll('.tr.th > span')).map(s => s.textContent.trim())")

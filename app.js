@@ -20,7 +20,6 @@
   const BOTTLE_FULL = 240;     // 젖병 그림의 가득 찬 기준(ml)
   const STEP_MIN = 10;         // ③ 10분 단위
   const STEP_ML = 10;          // ④⑥ 10ml 단위
-  const LONG_PRESS_MS = 650;
   const DOW = ['일', '월', '화', '수', '목', '금', '토'];
 
   const REQ_TIMEOUT = 8000;    // 네트워크 요청 제한 시간
@@ -48,7 +47,8 @@
   const timeDown = $('timeDown');
   const baseBox = $('baseBox');
   const baseVal = $('baseVal');
-  const baseMinus = $('baseMinus');
+  const baseUp = $('baseUp');
+  const baseDown = $('baseDown');
   const bottleBtn = $('bottleBtn');
   const bottleText = $('bottleText');
   const milkLayer = $('milkLayer');
@@ -1099,36 +1099,13 @@
       bumpBox(timeBox);
     });
 
-    // ④ 기본량 +10ml (길게 누르면 초기화)
-    let pressTimer = null;
-    let longPressed = false;
-    const startPress = () => {
-      longPressed = false;
-      clearTimeout(pressTimer);
-      pressTimer = setTimeout(() => {
-        longPressed = true;
-        setBase(BASE_START);
-        bumpBox(baseBox);
-        toast('기본량을 60ml로 되돌렸어요');
-      }, LONG_PRESS_MS);
-    };
-    const endPress = () => clearTimeout(pressTimer);
-    baseBox.addEventListener('pointerdown', startPress);
-    ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => baseBox.addEventListener(ev, endPress));
-    baseBox.addEventListener('contextmenu', (e) => e.preventDefault());
-    baseBox.addEventListener('click', () => {
-      if (longPressed) { longPressed = false; return; }
-      if (state.base >= BASE_MAX) {
-        toast('기본량은 300ml까지예요');
-        return;
-      }
+    // ④ 기본량 ▲▼ (10ml 단위 · 박스 자체는 눌리지 않는 표시)
+    baseUp.addEventListener('click', () => {
+      if (state.base >= BASE_MAX) { toast('기본량은 300ml까지예요'); return; }
       setBase(state.base + STEP_ML);
       bumpBox(baseBox);
     });
-
-    // ④ 보조: −10ml
-    baseMinus.addEventListener('click', (e) => {
-      e.stopPropagation();
+    baseDown.addEventListener('click', () => {
       if (state.base <= BASE_MIN) { toast('기본량은 10ml까지예요'); return; }
       setBase(state.base - STEP_ML);
       bumpBox(baseBox);
