@@ -98,7 +98,7 @@ index.html              화면 구조 (①~⑨, 수정 시트, 가족 공유 시
 styles.css              파스텔 테마 · 모바일 퍼스트 스타일
 app.js                  기록/누적/주간 계산 · localStorage · 시계 · 백업 · 가족 공유(SSE+동기화)
 manifest.webmanifest    PWA 매니페스트
-sw.js                   오프라인 캐시 (앱 셸 캐시 우선)
+sw.js                   오프라인 캐시 (HTML·JS·CSS 는 네트워크 우선, 아이콘만 캐시 우선)
 icon.svg                아이콘 원본
 icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png
 .dev/                   개발용: 가짜 Firebase 서버 · Playwright 검증 스크립트
@@ -113,10 +113,28 @@ python3 -m http.server 8765
 # 자동 검증 (가짜 Firebase + 실제 Firebase 두 기기 동기화 49개 항목)
 bash .dev/run-tests.sh
 
+# 캐시 불일치(버튼 무반응) 회귀 검증 · 옛 버전 → 새 버전 업그레이드 경로 검증
+python3 .dev/cache-mismatch-check.py   # http://127.0.0.1:8765 서버가 떠 있어야 함
+python3 .dev/upgrade-check.py          # 혼자서 임시 서버(8767)를 띄움
+
 # 라이브 사이트 + 실제 Firebase 확인 (테스트 방은 끝나고 자동 정리)
 python3 .dev/live-check.py
 python3 .dev/korean-room-check.py
 ```
 
-서비스워커와 매니페스트는 `https` 또는 `localhost`에서만 동작합니다. 파일을 수정해 배포하면 `sw.js`의
-`CACHE` 이름(`baby-feeding-v3`)을 올려 주세요. 그래야 홈 화면 앱이 새 파일을 받아 갑니다.
+서비스워커와 매니페스트는 `https` 또는 `localhost`에서만 동작합니다. 파일을 수정해 배포하면
+**두 가지를 함께** 해 주세요. 하나만 하면 예전처럼 "버튼이 안 눌리는" 상태가 생깁니다.
+
+1. `index.html`의 `?v=N` 을 올리기 (`./styles.css?v=N`, `./app.js?v=N`)
+2. `sw.js`의 `CACHE`/`VERSION` 을 같은 번호로 올리기 (`baby-feeding-vN`)
+
+지금은 `sw.js`가 **HTML·app.js·styles.css 를 네트워크 우선**(오프라인일 때만 캐시)으로 받기 때문에,
+버전을 올리지 않고 코드만 고쳐도 다음 접속에서 새 파일이 적용됩니다. `?v=N` 은 그래도 같이 올려 주세요
+(중간 캐시·프록시가 남아 있는 경우의 안전장치).
+
+### 2026-11-24 수정 · 버튼 무반응
+
+- 증상: 아이폰에서 `👩 엄마` / `👨 아빠` / `로컬 저장 모드` 버튼을 눌러도 반응 없음.
+- 원인: `sw.js`가 `index.html`만 네트워크 우선이고 `app.js`·`styles.css`는 **캐시 우선**이라,
+  새 화면(HTML)에 옛 `app.js`가 붙어 새 버튼에 클릭 핸들러가 등록되지 않았습니다.
+- 수정: `?v=4` 쿼리 부여 + `CACHE = 'baby-feeding-v4'` + 코드 자산 **네트워크 우선** 전환.

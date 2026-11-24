@@ -10,3 +10,5 @@ trap 'kill $H $M 2>/dev/null' EXIT
 sleep 1.5
 export LD_LIBRARY_PATH=/workspace/tmp/libroot/usr/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}
 python3 .dev/test_app.py
+python3 .dev/cache-mismatch-check.py
+python3 .dev/upgrade-check.py

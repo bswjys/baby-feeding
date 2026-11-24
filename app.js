@@ -1359,7 +1359,10 @@
     if ('serviceWorker' in navigator &&
         (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch((err) => console.warn('오프라인 준비 실패', err));
+        // sw.js 자체를 HTTP 캐시에서 읽지 않게 해서, 새 버전이 바로 적용되도록 한다
+        navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+          .then((reg) => reg.update().catch(() => {}))
+          .catch((err) => console.warn('오프라인 준비 실패', err));
       });
     }
   }
