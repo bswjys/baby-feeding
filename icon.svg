@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFF7EC"/>
+      <stop offset="0.55" stop-color="#FFEADE"/>
+      <stop offset="1" stop-color="#FFDCE8"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="30%" cy="20%" r="72%">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.88"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FCFFFF"/>
+      <stop offset="1" stop-color="#D5E9F9"/>
+    </linearGradient>
+    <linearGradient id="milk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFEED6"/>
+    </linearGradient>
+    <clipPath id="bclip">
+      <path d="M220 222 H380 V372 A48 48 0 0 1 332 420 H268 A48 48 0 0 1 220 372 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="248" r="252" fill="url(#glow)"/>
+
+  
+  <!-- 장식 점 -->
+  <circle cx="86" cy="408" r="13" fill="#FFD6C2" opacity="0.9"/>
+  <circle cx="432" cy="112" r="10" fill="#CFE6FF" opacity="0.95"/>
+  <circle cx="410" cy="402" r="8" fill="#FFC6D7" opacity="0.95"/>
+  <circle cx="96" cy="96" r="7" fill="#FFC6D7" opacity="0.8"/>
+
+  <!-- ① 시계 -->
+  <circle cx="158" cy="158" r="92" fill="#F6FBFF" stroke="#FFC3D4" stroke-width="16"/>
+  <g>
+    <line x1="158.0" y1="96.0" x2="158.0" y2="82.0" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="191.0" y1="100.8" x2="196.0" y2="92.2" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="215.2" y1="125.0" x2="223.8" y2="120.0" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="220.0" y1="158.0" x2="234.0" y2="158.0" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="215.2" y1="191.0" x2="223.8" y2="196.0" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="191.0" y1="215.2" x2="196.0" y2="223.8" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="158.0" y1="220.0" x2="158.0" y2="234.0" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="125.0" y1="215.2" x2="120.0" y2="223.8" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="100.8" y1="191.0" x2="92.2" y2="196.0" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="96.0" y1="158.0" x2="82.0" y2="158.0" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="100.8" y1="125.0" x2="92.2" y2="120.0" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+    <line x1="125.0" y1="100.8" x2="120.0" y2="92.2" stroke="#B9CBE0" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <line x1="158" y1="164" x2="158" y2="104" stroke="#EF8FA9" stroke-width="11" stroke-linecap="round"/>
+  <line x1="158" y1="164" x2="190" y2="146" stroke="#8A736B" stroke-width="13" stroke-linecap="round"/>
+  <circle cx="158" cy="158" r="13" fill="#8A736B"/>
+  <circle cx="158" cy="158" r="5.5" fill="#FFF6F0"/>
+
+  <!-- ⑤ 젖병 -->
+  <path d="M286 150 C286 128 314 128 314 150 V188 H286 Z" fill="#FFD8C4" stroke="#EFB49A" stroke-width="7" stroke-linejoin="round"/>
+  <rect x="269" y="180" width="62" height="38" rx="19" fill="#FFB3C6" stroke="#ED8AA4" stroke-width="6"/>
+  <path d="M276 210 H324 V234 H276 Z" fill="url(#glass)" stroke="#BFD8EE" stroke-width="6"/>
+  <path d="M220 222 H380 V372 A48 48 0 0 1 332 420 H268 A48 48 0 0 1 220 372 Z" fill="url(#glass)" stroke="#BCD6EC" stroke-width="9"/>
+  <g clip-path="url(#bclip)">
+    <rect x="220" y="266" width="160" height="164" fill="url(#milk)"/>
+    <ellipse cx="300" cy="266" rx="82" ry="13" fill="#FFFFFF"/>
+  </g>
+  <g stroke="#A9C6E0" stroke-width="6" stroke-linecap="round" opacity="0.9">
+    <line x1="352" y1="272" x2="368" y2="272"/>
+    <line x1="352" y1="306" x2="368" y2="306"/>
+    <line x1="352" y1="340" x2="368" y2="340"/>
+    <line x1="352" y1="374" x2="368" y2="374"/>
+  </g>
+  <path d="M244 252 V358" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" opacity="0.8"/>
+  <path d="M220 222 H380 V372 A48 48 0 0 1 332 420 H268 A48 48 0 0 1 220 372 Z" fill="none" stroke="#BCD6EC" stroke-width="9"/>
+  
+</svg>

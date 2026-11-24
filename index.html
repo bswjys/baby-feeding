@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>수유 앱</title>
+<meta name="theme-color" content="#FFF7EE">
+<meta name="description" content="시계와 젖병을 눌러 수유량을 기록하는 귀여운 수유 노트">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="수유">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="head">
+    <div class="head-line">
+      <h1>수유 앱 <span class="h1-bug">🍼</span></h1>
+      <span class="date-chip" id="headDate">11월 24일 화요일</span>
+    </div>
+    <p class="head-sub" id="headSub">오늘도 수고 많았어요</p>
+  </header>
+
+  <div class="top-grid">
+    <!-- ① 동그란 시계 · ③ 시간 화살표 · ② 시간 박스 -->
+    <section class="panel clock-panel">
+      <span class="panel-tag">지금 시간</span>
+      <div class="clock-row">
+        <button class="clock" id="clockBtn" type="button" aria-label="시계를 눌러 지금 시간으로 맞추기">
+          <svg class="clock-svg" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <radialGradient id="faceGrad" cx="36%" cy="28%" r="82%">
+                <stop offset="0" stop-color="#FFFFFF"/>
+                <stop offset="1" stop-color="#E9F3FF"/>
+              </radialGradient>
+            </defs>
+            <circle cx="50" cy="50" r="46.5" fill="url(#faceGrad)" stroke="#FFC9D8" stroke-width="5"/>
+            <g id="ticks" stroke="#B7C9DE" stroke-width="2.4" stroke-linecap="round"></g>
+            <g id="handHour" class="hand">
+              <line x1="50" y1="53" x2="50" y2="33" stroke="#8A736B" stroke-width="5.4" stroke-linecap="round"/>
+            </g>
+            <g id="handMin" class="hand">
+              <line x1="50" y1="54" x2="50" y2="21" stroke="#EE8FA9" stroke-width="3.6" stroke-linecap="round"/>
+            </g>
+            <circle cx="50" cy="50" r="4.6" fill="#8A736B"/>
+            <circle cx="50" cy="50" r="1.8" fill="#FFF6F0"/>
+          </svg>
+        </button>
+        <div class="stepper" role="group" aria-label="시간 10분 단위 조절">
+          <button class="step" id="timeUp" type="button" aria-label="10분 뒤로">▲</button>
+          <button class="step" id="timeDown" type="button" aria-label="10분 앞으로">▼</button>
+        </div>
+      </div>
+      <div class="time-box" id="timeBox">
+        <span class="ampm" id="ampm">오후</span><span class="tval" id="timeVal">2:00</span>
+      </div>
+    </section>
+
+    <!-- ④ 기본량 · ⑤ 젖병 · ⑥ 수유량 화살표 · ⑦ 수유량 박스 -->
+    <section class="panel bottle-panel">
+      <div class="base-row">
+        <button class="base-box" id="baseBox" type="button" aria-label="기본량 10ml 늘리기, 길게 누르면 60ml로 초기화">
+          <span class="base-label">기본량</span>
+          <span class="base-val" id="baseVal">60ml</span>
+        </button>
+        <button class="mini" id="baseMinus" type="button" aria-label="기본량 10ml 줄이기">−</button>
+      </div>
+      <div class="bottle-row">
+        <button class="bottle" id="bottleBtn" type="button" aria-label="기본량으로 바로 수유 기록하기">
+          <svg class="bottle-svg" viewBox="0 0 100 150" aria-hidden="true">
+            <defs>
+              <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#F8FDFF"/>
+                <stop offset="1" stop-color="#D9EBFA"/>
+              </linearGradient>
+              <linearGradient id="milkGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#FFFFFF"/>
+                <stop offset="1" stop-color="#FFEFD3"/>
+              </linearGradient>
+              <clipPath id="bodyClip">
+                <path d="M31 42 H69 V117 A16 16 0 0 1 53 133 H47 A16 16 0 0 1 31 117 Z"/>
+              </clipPath>
+            </defs>
+            <path d="M44 14 C44 5 56 5 56 14 V27 H44 Z" fill="#FFD9C6" stroke="#F0B49A" stroke-width="1.6" stroke-linejoin="round"/>
+            <rect x="38" y="24" width="24" height="14" rx="7" fill="#FFB3C6" stroke="#EF8CA6" stroke-width="1.4"/>
+            <path d="M36 34 H64 V44 H36 Z" fill="url(#glassGrad)" stroke="#BFD8EE" stroke-width="1.4"/>
+            <path d="M31 42 H69 V117 A16 16 0 0 1 53 133 H47 A16 16 0 0 1 31 117 Z" fill="url(#glassGrad)" stroke="#BCD6EC" stroke-width="2"/>
+            <g clip-path="url(#bodyClip)">
+              <g id="milkLayer">
+                <rect x="31" y="42" width="38" height="92" fill="url(#milkGrad)"/>
+                <ellipse cx="50" cy="42.5" rx="20" ry="4" fill="#FFFFFF" opacity=".95"/>
+              </g>
+            </g>
+            <g stroke="#A9C6E0" stroke-width="1.6" stroke-linecap="round" opacity=".85">
+              <line x1="62" y1="56" x2="67" y2="56"/>
+              <line x1="62" y1="68" x2="67" y2="68"/>
+              <line x1="62" y1="80" x2="67" y2="80"/>
+              <line x1="62" y1="92" x2="67" y2="92"/>
+              <line x1="62" y1="104" x2="67" y2="104"/>
+              <line x1="62" y1="116" x2="67" y2="116"/>
+            </g>
+            <path d="M38 52 V112" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" opacity=".75"/>
+            <path d="M31 42 H69 V117 A16 16 0 0 1 53 133 H47 A16 16 0 0 1 31 117 Z" fill="none" stroke="#BCD6EC" stroke-width="2"/>
+          </svg>
+          <span class="bottle-text" id="bottleText">60ml</span>
+        </button>
+        <div class="stepper" role="group" aria-label="이번 수유량 10ml 단위 조절">
+          <button class="step" id="amtUp" type="button" aria-label="수유량 10ml 늘리기">▲</button>
+          <button class="step" id="amtDown" type="button" aria-label="수유량 10ml 줄이기">▼</button>
+        </div>
+      </div>
+      <button class="amount-box" id="amountBox" type="button" aria-label="이 수유량으로 기록하기">
+        <span id="amountVal">60ml</span>
+      </button>
+    </section>
+  </div>
+
+  <p class="hint">시계 ▸ <b>지금 시간</b> · 젖병 ▸ <b>바로 기록</b> · 아래 박스도 눌러서 기록</p>
+
+  <!-- ⑧ 날짜 · 시간 · 수유량 · 누적 -->
+  <section class="panel list-panel">
+    <div class="panel-head">
+      <h2>기록</h2>
+      <span class="today-sum" id="todaySum">오늘 0ml</span>
+    </div>
+    <div class="tbl">
+      <div class="tr th">
+        <span>날짜</span><span>시간</span><span class="ta-r">수유량</span><span class="ta-r">누적</span><span></span>
+      </div>
+      <div class="tbody" id="recordList"></div>
+    </div>
+  </section>
+
+  <!-- ⑨ 일 ~ 토 주간 누적 -->
+  <section class="panel week-panel">
+    <div class="panel-head">
+      <h2>주간 누적</h2>
+      <div class="week-nav">
+        <button id="weekPrev" type="button" aria-label="이전 주">◀</button>
+        <button id="weekLabel" type="button" title="이번 주로 돌아가기">11.23 – 11.29</button>
+        <button id="weekNext" type="button" aria-label="다음 주">▶</button>
+      </div>
+    </div>
+    <div class="week-grid" id="weekGrid"></div>
+    <div class="week-total"><span id="weekTotalLabel">이번 주 합계</span><b id="weekTotal">0ml</b></div>
+  </section>
+
+  <div class="footer">
+    <button class="ghost" id="btnBackup" type="button">백업</button>
+    <button class="ghost" id="btnRestore" type="button">복원</button>
+    <button class="ghost" id="btnReset" type="button">초기화</button>
+    <input type="file" id="fileInput" accept="application/json,.json" hidden>
+  </div>
+  <p class="footer-note">기록은 이 기기에만 저장돼요 · 홈 화면에 추가해서 쓰세요</p>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="sheet-backdrop" id="sheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-grip"></div>
+    <h3 id="sheetTitle">기록 수정</h3>
+    <label class="field">
+      <span>날짜</span>
+      <input type="date" id="editDate">
+    </label>
+    <label class="field">
+      <span>시간</span>
+      <input type="time" id="editTime">
+    </label>
+    <div class="field">
+      <span>수유량</span>
+      <div class="amt-edit">
+        <button type="button" id="editMinus" aria-label="10ml 줄이기">−</button>
+        <input type="number" id="editMl" inputmode="numeric" step="10" min="10" max="400">
+        <span class="unit">ml</span>
+        <button type="button" id="editPlus" aria-label="10ml 늘리기">+</button>
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <button class="danger" id="editDelete" type="button">삭제</button>
+      <button id="editCancel" type="button">취소</button>
+      <button class="primary" id="editSave" type="button">저장</button>
+    </div>
+  </div>
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>
