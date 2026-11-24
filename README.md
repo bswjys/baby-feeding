@@ -118,6 +118,7 @@ python3 .dev/cache-mismatch-check.py   # http://127.0.0.1:8765 서버가 떠 있
 python3 .dev/upgrade-check.py          # 혼자서 임시 서버(8767)를 띄움
 
 # 라이브 사이트 + 실제 Firebase 확인 (테스트 방은 끝나고 자동 정리)
+python3 .dev/live-cache-check.py     # 배포 후: 서비스워커 v4·캐시·버튼 동작
 python3 .dev/live-check.py
 python3 .dev/korean-room-check.py
 ```
