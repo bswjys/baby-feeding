@@ -22,6 +22,24 @@
       <h1>수유 앱 <span class="h1-bug">🍼</span></h1>
       <span class="date-chip" id="headDate">11월 24일 화요일</span>
     </div>
+
+    <!-- 기록자 선택 · 가족 공유 상태 -->
+    <div class="who-row">
+      <div class="who" role="group" aria-label="누가 기록하나요">
+        <button class="who-btn" id="whoMom" type="button" data-who="mom" aria-pressed="true" aria-label="엄마로 기록하기">
+          <span class="who-emoji" aria-hidden="true">👩</span> 엄마
+        </button>
+        <button class="who-btn" id="whoDad" type="button" data-who="dad" aria-pressed="false" aria-label="아빠로 기록하기">
+          <span class="who-emoji" aria-hidden="true">👨</span> 아빠
+        </button>
+      </div>
+      <button class="share-pill" id="sharePill" type="button" aria-label="가족 공유 설정 열기">
+        <span class="dot dot-local" id="shareDot" aria-hidden="true"></span>
+        <span class="share-label" id="shareLabel">로컬 저장 모드</span>
+        <span class="share-room" id="shareRoom" hidden></span>
+      </button>
+    </div>
+
     <p class="head-sub" id="headSub">오늘도 수고 많았어요</p>
   </header>
 
@@ -155,11 +173,12 @@
     <button class="ghost" id="btnReset" type="button">초기화</button>
     <input type="file" id="fileInput" accept="application/json,.json" hidden>
   </div>
-  <p class="footer-note">기록은 이 기기에만 저장돼요 · 홈 화면에 추가해서 쓰세요</p>
+  <p class="footer-note" id="footerNote">기록은 이 기기에 저장돼요 · 공유를 켜면 가족과 함께</p>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<!-- 기록 수정 시트 -->
 <div class="sheet-backdrop" id="sheet" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="sheet-grip"></div>
@@ -185,6 +204,50 @@
       <button class="danger" id="editDelete" type="button">삭제</button>
       <button id="editCancel" type="button">취소</button>
       <button class="primary" id="editSave" type="button">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 가족 공유 시트 -->
+<div class="sheet-backdrop" id="shareSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+    <div class="sheet-grip"></div>
+    <h3 id="shareTitle">👨‍👩‍👧 엄마 · 아빠 실시간 공유</h3>
+    <p class="share-desc">같은 <b>가족 방 코드</b>를 두 폰에 넣으면, 한쪽에서 기록하면 다른 폰에도 1~2초 안에 나타나요.</p>
+
+    <div class="share-status" id="shareStatus" data-mode="local">
+      <span class="dot dot-local" id="shareStatusDot" aria-hidden="true"></span>
+      <span id="shareStatusText">로컬 저장 모드 · 이 기기에만 저장돼요</span>
+    </div>
+
+    <label class="field col">
+      <span>가족 방 코드 <small class="field-hint">2~12자 · 한글도 돼요</small></span>
+      <div class="code-row">
+        <input type="text" id="roomInput" maxlength="12" inputmode="text" autocomplete="off"
+               autocapitalize="characters" spellcheck="false" placeholder="예: 우리집">
+        <button type="button" class="mini-wide" id="roomNew">새 코드</button>
+      </div>
+    </label>
+
+    <details class="adv" id="advBox">
+      <summary>연결 주소 <small id="advHint">(기본 주소 사용 중)</small></summary>
+      <label class="field col">
+        <span>databaseURL</span>
+        <input type="url" id="dbInput" autocomplete="off" spellcheck="false"
+               placeholder="https://내프로젝트-default-rtdb.firebaseio.com">
+      </label>
+      <p class="adv-note">Firebase 콘솔 → Realtime Database → 데이터 탭 위쪽의 주소를 그대로 붙여넣으면 돼요.</p>
+    </details>
+
+    <p class="share-note" id="shareNote">방 코드를 아는 가족만 기록을 함께 볼 수 있어요.</p>
+    <div class="share-extra">
+      <button type="button" class="ghost-mini" id="shareSend" hidden>📨 코드 보내기</button>
+      <button type="button" class="ghost-mini" id="shareLeave" hidden>공유 끄기</button>
+    </div>
+
+    <div class="sheet-actions">
+      <button id="shareCancel" type="button">닫기</button>
+      <button class="primary" id="shareSave" type="button">연결하기</button>
     </div>
   </div>
 </div>

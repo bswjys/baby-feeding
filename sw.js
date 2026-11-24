@@ -1,5 +1,5 @@
 /* 수유 앱 · 오프라인 캐시 */
-const CACHE = 'baby-feeding-v1';
+const CACHE = 'baby-feeding-v3';
 const ASSETS = [
   './',
   './index.html',
