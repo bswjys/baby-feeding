@@ -31,6 +31,16 @@ body{
   touch-action:manipulation;
 }
 
+/* ===== 모달·추가창 화면 고정 (2026-11-28) =====
+   시트가 열린 동안 배경 스크롤을 잠그고, 창이 좌우·위아래로 흔들리지 않게 함
+   - body.modal-open: 여는 순간의 스크롤 위치(top)는 JS가 맞춘다 */
+body.modal-open{
+  position:fixed; left:0; right:0; width:100%;
+  overflow:hidden; overscroll-behavior:none;
+}
+.sheet-backdrop{ overflow-x:hidden; overscroll-behavior:contain; }
+.sheet{ overflow-x:hidden; overscroll-behavior:contain; touch-action:pan-y; -webkit-overflow-scrolling:touch; }
+
 .app{
   width:100%;
   max-width:460px;

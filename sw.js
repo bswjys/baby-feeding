@@ -5,8 +5,8 @@
  *    (예전엔 캐시 우선이라서 새 HTML + 옛 app.js 가 섞여 버튼이 안 먹혔음)
  *  - 아이콘 등 나머지: 캐시 우선
  */
-const CACHE = 'baby-feeding-v7';
-const VERSION = '7';
+const CACHE = 'baby-feeding-v8';
+const VERSION = '8';
 const ASSETS = [
   './',
   './index.html',

@@ -965,6 +965,31 @@
   }
 
   /* ── 공유 시트 ── */
+  /* 모달·추가창 화면 고정 (2026-11-28)
+     열 때 스크롤 위치를 저장하고 body를 fixed로 잠가 배경이 흔들리지 않게 한다. */
+  let lockedScrollY = null;
+  const MODAL_IDS = ['sheet', 'shareSheet'];
+
+  function syncModalLock() {
+    const anyOpen = MODAL_IDS.some((id) => {
+      const n = document.getElementById(id);
+      return n && !n.hidden;
+    });
+    const isLocked = document.body.classList.contains('modal-open');
+
+    if (anyOpen && !isLocked) {
+      lockedScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+      document.body.style.top = `-${lockedScrollY}px`;
+      document.body.classList.add('modal-open');
+    } else if (!anyOpen && isLocked) {
+      document.body.classList.remove('modal-open');
+      document.body.style.top = '';
+      const backY = lockedScrollY || 0;
+      lockedScrollY = null;
+      window.scrollTo(0, backY);
+    }
+  }
+
   function openShareSheet() {
     roomInput.value = share.room;
     dbInput.value = share.url || normDb(DEFAULT_FIREBASE_URL);
@@ -977,11 +1002,13 @@
       : '방 코드를 아는 가족만 기록을 함께 볼 수 있어요.';
     renderShare();
     shareSheet.hidden = false;
+    syncModalLock();
     setTimeout(() => { try { roomInput.focus(); } catch (err) { /* 무시 */ } }, 120);
   }
 
   function closeShareSheet() {
     shareSheet.hidden = true;
+    syncModalLock();
   }
 
   function randomRoom() {
@@ -1218,10 +1245,12 @@
     editMl.value = String(rec.ml);
     $('sheetTitle').textContent = rec.by ? `기록 수정 · ${byLabel(rec.by)}` : '기록 수정';
     sheet.hidden = false;
+    syncModalLock();
   }
   function closeSheet() {
     sheet.hidden = true;
     sheet.dataset.id = '';
+    syncModalLock();
   }
   function saveSheet() {
     const rec = state.records.find((r) => r.id === sheet.dataset.id);
