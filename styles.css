@@ -664,7 +664,7 @@ h2{
   background:#FFF9F3;
   color:#5B4A45;
   font-family:var(--round);
-  font-size:14px;
+  font-size:16px;
   font-weight:700;
 }
 .amt-edit{
@@ -759,12 +759,12 @@ h2{
   background:#FFF9F3;
   color:#5B4A45;
   font-family:var(--round);
-  font-size:14px;
+  font-size:16px;
   font-weight:800;
   letter-spacing:.06em;
 }
 .field input[type=url]{
-  font-size:12px;
+  font-size:16px;
   letter-spacing:0;
   text-transform:none;
   font-weight:600;
@@ -845,3 +845,16 @@ h2{
   .share-room{font-size:9px;padding:1px 4px;}
   .head-line h1{font-size:19px;}
 }
+
+/* ===== 아이폰 화면 고정 (2026-11-28) =====
+   사파리·홈 화면 앱에서 화면이 커졌다 작아졌다 하지 않도록
+   - 입력창 글자는 16px 이상(아이폰 자동 확대 방지)
+   - 가로 넘침·바운스 스크롤 막음, 글자 자동 확대 막음 */
+html, body {
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+html { touch-action: manipulation; }
+input, textarea, select { font-size: max(16px, 1em); }

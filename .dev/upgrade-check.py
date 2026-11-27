@@ -4,7 +4,7 @@
 사용자 아이폰 상태를 그대로 만든다:
   1) 옛 캐시(v3)가 남은 기기 + 옛 app.js(엄마/아빠 버튼 핸들러 없음)가 설치된 기기
   2) 새 버전을 배포
-  3) 앱을 다시 열었을 때 버튼이 살아나고, 서비스워커·캐시가 v6 로 넘어오는지 확인
+  3) 앱을 다시 열었을 때 버튼이 살아나고, 서비스워커·캐시가 v7 로 넘어오는지 확인
 """
 import os
 import re
@@ -78,7 +78,7 @@ def main():
     # 옛 HTML: 버전 쿼리 없는 상태
     idx = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
     with open(os.path.join(tmp, 'index.html'), 'w', encoding='utf-8') as f:
-        f.write(idx.replace('./styles.css?v=6', './styles.css').replace('./app.js?v=6', './app.js'))
+        f.write(idx.replace('./styles.css?v=7', './styles.css').replace('./app.js?v=7', './app.js'))
 
     srv = subprocess.Popen([sys.executable, '-m', 'http.server', str(PORT), '--bind', '127.0.0.1'],
                            cwd=tmp, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -122,7 +122,7 @@ def main():
             time.sleep(1.2)                      # Last-Modified 초 단위 구분
             for name in ('index.html', 'app.js', 'styles.css', 'sw.js'):
                 os.utime(os.path.join(tmp, name), None)
-            check('배포할 index.html 에 ?v=6', 'app.js?v=6' in open(os.path.join(tmp, 'index.html'), encoding='utf-8').read())
+            check('배포할 index.html 에 ?v=7', 'app.js?v=7' in open(os.path.join(tmp, 'index.html'), encoding='utf-8').read())
 
             # ── ③ 사용자가 앱을 다시 연다
             page.reload(wait_until='load')
@@ -146,14 +146,14 @@ def main():
             page.reload(wait_until='load')
             page.wait_for_timeout(1200)
             keys = page.evaluate("async () => (await caches.keys()).filter(k=>k.startsWith('baby-feeding-'))")
-            check('캐시가 v6 만 남음', keys == ['baby-feeding-v6'], keys)
+            check('캐시가 v7 만 남음', keys == ['baby-feeding-v7'], keys)
             scripts = page.evaluate("() => Array.from(document.scripts).map(s => s.src)")
-            check('새 HTML 이 app.js?v=6 로드', any('app.js?v=6' in s for s in scripts), scripts)
+            check('새 HTML 이 app.js?v=7 로드', any('app.js?v=7' in s for s in scripts), scripts)
             cache_keys = page.evaluate("""async () => {
-                const c = await caches.open('baby-feeding-v6');
+                const c = await caches.open('baby-feeding-v7');
                 return (await c.keys()).map(r => r.url);
             }""")
-            check('v6 캐시에 app.js?v=6 포함', any('app.js?v=6' in u for u in cache_keys))
+            check('v7 캐시에 app.js?v=7 포함', any('app.js?v=7' in u for u in cache_keys))
             page.click('#whoDad')
             page.wait_for_timeout(200)
             check('업그레이드 후에도 버튼 동작', page.get_attribute('#whoDad', 'aria-pressed') == 'true')

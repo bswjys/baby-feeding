@@ -2,8 +2,8 @@
 """수유 앱 · 라이브(bswjys.github.io) 서비스워커/캐시 확인.
 
 배포된 라이브 주소에서
-  - index.html 이 app.js?v=6 / styles.css?v=6 를 물고 오는지
-  - 서비스워커가 v6 로 설치되고 옛 캐시(baby-feeding-v1~v3)가 지워지는지
+  - index.html 이 app.js?v=7 / styles.css?v=7 를 물고 오는지
+  - 서비스워커가 v7 로 설치되고 옛 캐시(baby-feeding-v1~v3)가 지워지는지
   - 캐시에 옛 app.js 가 남아 있어도 새로고침 한 번에 새 app.js 로 바뀌는지
   - 엄마/아빠/공유 버튼이 실제로 눌리는지
 를 확인한다. (기록은 localStorage 에만 남고 방은 만들지 않는다)
@@ -37,8 +37,8 @@ with sync_playwright() as p:
     page.wait_for_timeout(1200)
     scripts = page.evaluate("() => Array.from(document.scripts).map(s => s.src)")
     links = page.evaluate("() => Array.from(document.querySelectorAll('link[rel=stylesheet]')).map(l => l.href)")
-    check('라이브 HTML 이 app.js?v=6', any('app.js?v=6' in s for s in scripts), scripts)
-    check('라이브 HTML 이 styles.css?v=6', any('styles.css?v=6' in l for l in links), links)
+    check('라이브 HTML 이 app.js?v=7', any('app.js?v=7' in s for s in scripts), scripts)
+    check('라이브 HTML 이 styles.css?v=7', any('styles.css?v=7' in l for l in links), links)
 
     page.wait_for_timeout(2500)          # 서비스워커 설치 대기
     page.reload(wait_until='load', timeout=45000)
@@ -46,7 +46,7 @@ with sync_playwright() as p:
     ctrl = page.evaluate("() => !!navigator.serviceWorker.controller")
     keys = page.evaluate("async () => (await caches.keys()).filter(k => k.startsWith('baby-feeding-'))")
     check('서비스워커가 페이지 제어', ctrl)
-    check('캐시는 baby-feeding-v6 만', keys == ['baby-feeding-v6'], keys)
+    check('캐시는 baby-feeding-v7 만', keys == ['baby-feeding-v7'], keys)
     cache_urls = page.evaluate("""async () => {
         const out = [];
         for (const n of await caches.keys()) {
@@ -55,11 +55,11 @@ with sync_playwright() as p:
         }
         return out;
     }""")
-    check('v6 캐시에 app.js?v=6 포함', any('app.js?v=6' in u for u in cache_urls), len(cache_urls))
+    check('v7 캐시에 app.js?v=7 포함', any('app.js?v=7' in u for u in cache_urls), len(cache_urls))
 
     # 옛 app.js 를 캐시에 심어 두고 새로고침 → 네트워크 우선이면 새 파일로 교체된다
     page.evaluate("""async () => {
-        const c = await caches.open('baby-feeding-v6');
+        const c = await caches.open('baby-feeding-v7');
         await c.put(new Request(location.origin + '/baby-feeding/app.js'), new Response('window.__stale = 1;'));
     }""")
     page.reload(wait_until='load', timeout=45000)
